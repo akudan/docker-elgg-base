@@ -41,13 +41,6 @@ RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 # Install Composer. We run it in run.sh so the /app volume is mounted
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# install from nodesource using apt-get
-# https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
-RUN curl -sSL https://deb.nodesource.com/setup | bash && apt-get install -yq nodejs build-essential
-
-# fix npm - not the latest version installed by apt-get
-RUN npm install -g npm
- 
 # Translate all git:// to https://
 # Thank you http://stackoverflow.com/questions/15903275/git-is-blocked-how-to-install-npm-modules
 RUN git config --global url."https://".insteadOf git://
@@ -65,5 +58,3 @@ RUN rm -rf /tmp/* /var/tmp/*
 # Add volumes for MySQL 
 # Removing this because docker stop and starts won't work
 #VOLUME  ["/etc/mysql", "/var/lib/mysql"]
-
-EXPOSE 80 3306 9876
