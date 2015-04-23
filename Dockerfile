@@ -1,5 +1,5 @@
 FROM ubuntu:trusty
-MAINTAINER Mike Jett <mjett@mitre.org>
+MAINTAINER Ariel Abrams-Kudan <arielak@mitre.org>
 
 # Linux hosts with kernel > 3.15 have problems modifying users.
 # This is the suggested fix
@@ -54,7 +54,3 @@ ENV PHP_POST_MAX_SIZE 10M
 
 # clean up tmp files (we don't need them for the image)
 RUN rm -rf /tmp/* /var/tmp/*
-
-# Add volumes for MySQL 
-# Removing this because docker stop and starts won't work
-#VOLUME  ["/etc/mysql", "/var/lib/mysql"]
