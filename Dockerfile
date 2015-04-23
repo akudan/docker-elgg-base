@@ -18,7 +18,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Add image configuration and scripts
 ADD start-apache2.sh /start-apache2.sh
 ADD start-mysqld.sh /start-mysqld.sh
-ADD run.sh /run.sh
 RUN chmod 755 /*.sh
 ADD my.cnf /etc/mysql/conf.d/my.cnf
 ADD supervisord-apache2.conf /etc/supervisor/conf.d/supervisord-apache2.conf
@@ -38,7 +37,7 @@ RUN a2enmod rewrite
 # Create a space for Elgg
 RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 
-# Install Composer. We run it in run.sh so the /app volume is mounted
+# Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Translate all git:// to https://
