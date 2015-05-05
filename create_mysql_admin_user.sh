@@ -17,6 +17,18 @@ mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' WITH GRANT O
 mysql -uroot -e "CREATE DATABASE ${ELGG_DB_NAME}"
 mysql -uroot -e "FLUSH PRIVILEGES"
 
+mysqladmin shutdown
+
+RET=0
+while [[ RET -eq 0 ]]; do
+    echo "=> Waiting for confirmation of MySQL service shutdown"
+    sleep 5
+    mysql -uroot -e "status" > /dev/null 2>&1
+    RET=$?
+done
+
+
+
 echo "=> Done!"
 
 echo "========================================================================"
@@ -30,4 +42,3 @@ fi
 echo ""
 echo "========================================================================"
 
-mysqladmin -uroot shutdown
