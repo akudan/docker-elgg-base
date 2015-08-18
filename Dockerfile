@@ -9,7 +9,7 @@ RUN mv /usr/bin/chfn /usr/bin/chfn.real && ln -s /bin/true /usr/bin/chfn
 # Install packages
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
-  apt-get -y install supervisor apache2-utils git apache2 curl php5-gd libapache2-mod-php5 mysql-server php5-mysql php5-curl pwgen php-apc php5-mcrypt && \
+  apt-get -y install supervisor ssmtp apache2-utils git apache2 curl php5-gd libapache2-mod-php5 mysql-server php5-mysql php5-curl pwgen php-apc php5-mcrypt && \
   echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # package install is finished, clean up
@@ -29,6 +29,12 @@ RUN rm -rf /var/lib/mysql/*
 # Add MySQL utils
 ADD create_mysql_admin_user.sh /create_mysql_admin_user.sh
 RUN chmod 755 /*.sh
+
+# Configure sendmail to work in container
+# This will only work if the hostname is specified correctly via the docker run command!
+RUN rm -fr /usr/sbin/sendmail
+RUN ln -s /usr/sbin/ssmtp /usr/sbin/sendmail
+RUN echo "sendmail_path =/usr/sbin/ssmtp -t" >> /etc/php5/cli/php.ini
 
 # config to enable .htaccess
 ADD apache_default /etc/apache2/sites-available/000-default.conf
