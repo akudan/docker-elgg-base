@@ -9,7 +9,7 @@ RUN mv /usr/bin/chfn /usr/bin/chfn.real && ln -s /bin/true /usr/bin/chfn
 # Install packages
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
-  apt-get -y install supervisor apache2-utils git apache2 curl php5-gd libapache2-mod-php5 mysql-server php5-mysql php5-curl pwgen php-apc php5-mcrypt && \
+  apt-get -y install supervisor ssmtp apache2-utils git apache2 curl php5-gd libapache2-mod-php5 mysql-server php5-mysql php5-curl pwgen php-apc php5-mcrypt php-apc && \
   echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # package install is finished, clean up
@@ -23,12 +23,16 @@ ADD my.cnf /etc/mysql/conf.d/my.cnf
 ADD supervisord-apache2.conf /etc/supervisor/conf.d/supervisord-apache2.conf
 ADD supervisord-mysqld.conf /etc/supervisor/conf.d/supervisord-mysqld.conf
 
+# Fix sendmail with ssmtp
+ADD sendmail.ini /etc/php5/mods-available/sendmail.ini
+RUN php5enmod sendmail
+ADD rewrite-sendmail.sh /rewrite-sendmail.sh
+
 # Remove pre-installed database
 RUN rm -rf /var/lib/mysql/*
 
 # Add MySQL utils
 ADD create_mysql_admin_user.sh /create_mysql_admin_user.sh
-RUN chmod 755 /*.sh
 
 # config to enable .htaccess
 ADD apache_default /etc/apache2/sites-available/000-default.conf
@@ -50,6 +54,9 @@ RUN chown -R www-data:www-data /media
 # Environment variables to configure php and elgg
 ENV PHP_UPLOAD_MAX_FILESIZE 10M
 ENV PHP_POST_MAX_SIZE 10M
+
+# Fix perms on scripts
+RUN chmod 755 /*.sh
 
 # clean up tmp files (we don't need them for the image)
 RUN rm -rf /tmp/* /var/tmp/*
