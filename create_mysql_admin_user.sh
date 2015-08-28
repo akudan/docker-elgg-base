@@ -17,11 +17,11 @@ mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' WITH GRANT O
 mysql -uroot -e "CREATE DATABASE ${ELGG_DB_NAME}"
 mysql -uroot -e "FLUSH PRIVILEGES"
 
+echo "=> Creating Debian System user debian-sys-maint."
 
-echo "=> Fixing privileges for user debian-sys-maint."
-
-DEBIAN_PASS=awk '/password/{print $NF}' /etc/mysql/debian.cnf | head -n1
-mysql -uroot -e "ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' IDENTIFIED BY '${DEBIAN_PASS}'"
+DEBIAN_PASS=`awk '/password/{print $NF}' /etc/mysql/debian.cnf | head -n1`
+mysql -uroot -e "CREATE USER 'debian-sys-maint'@'localhost' IDENTIFIED BY '${DEBIAN_PASS}'"
+mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'debian-sys-maint'@'localhost' WITH GRANT OPTION"
 
 mysqladmin shutdown
 
