@@ -1,3 +1,4 @@
 #!/bin/bash
 source /etc/apache2/envvars
-exec apache2 -D FOREGROUND
+exec 2>&1
+exec httpd -eDEBUG -DNO_DETACH -DFOREGROUND

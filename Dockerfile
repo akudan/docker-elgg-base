@@ -1,26 +1,22 @@
-FROM ubuntu:trusty
+FROM phusion/baseimage:0.9.17
 MAINTAINER Ariel Abrams-Kudan <arielak@mitre.org>
 
-# Linux hosts with kernel > 3.15 have problems modifying users.
-# This is the suggested fix
-# See https://github.com/docker/docker/issues/6345
-RUN mv /usr/bin/chfn /usr/bin/chfn.real && ln -s /bin/true /usr/bin/chfn
+# Use baseimage-docker's init system.
+CMD ["/sbin/my_init"]
 
 # Install packages
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
-  apt-get -y install supervisor ssmtp apache2-utils git apache2 curl php5-gd libapache2-mod-php5 mysql-server php5-mysql php5-curl pwgen php-apc php5-mcrypt php-apc && \
+  apt-get -y install ssmtp apache2-utils git apache2 curl php5-gd libapache2-mod-php5 mysql-server php5-mysql php5-curl pwgen php-apc php5-mcrypt php-apc && \
   echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# package install is finished, clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
 # Add image configuration and scripts
-ADD start-apache2.sh /start-apache2.sh
-ADD start-mysqld.sh /start-mysqld.sh
+RUN mkdir /etc/service/apache2
+ADD start-apache2.sh /etc/service/apache2/run
+
+RUN mkdir /etc/service/mysqld
+ADD start-mysqld.sh /etc/service/mysqld/run
 ADD my.cnf /etc/mysql/conf.d/my.cnf
-ADD supervisord-apache2.conf /etc/supervisor/conf.d/supervisord-apache2.conf
-ADD supervisord-mysqld.conf /etc/supervisor/conf.d/supervisord-mysqld.conf
 
 # Fix sendmail with ssmtp
 ADD sendmail.ini /etc/php5/mods-available/sendmail.ini
@@ -58,4 +54,4 @@ ENV PHP_POST_MAX_SIZE 10M
 RUN chmod 755 /*.sh
 
 # clean up tmp files (we don't need them for the image)
-RUN rm -rf /tmp/* /var/tmp/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
