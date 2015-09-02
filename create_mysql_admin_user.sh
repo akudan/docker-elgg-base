@@ -1,33 +1,18 @@
 #!/bin/bash
 
-/usr/bin/mysqld_safe > /dev/null 2>&1 &
-
-RET=1
-while [[ RET -ne 0 ]]; do
-    echo "=> Waiting for confirmation of MySQL service startup"
-    sleep 5
-    mysql -uroot -e "status" > /dev/null 2>&1
-    RET=$?
-done
+echo "=>  Confirming MySQL service startup"
+sv start mysql & wait
 
 echo "=> Creating MySQL user ${MYSQL_USER}."
 
 mysql -uroot -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASS}'"
 mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' WITH GRANT OPTION"
 mysql -uroot -e "CREATE DATABASE ${ELGG_DB_NAME}"
-mysql -uroot -e "FLUSH PRIVILEGES"
 
-mysqladmin shutdown
-
-RET=0
-while [[ RET -eq 0 ]]; do
-    echo "=> Waiting for confirmation of MySQL service shutdown"
-    sleep 5
-    mysql -uroot -e "status" > /dev/null 2>&1
-    RET=$?
-done
-
-
+# Make sure that NOBODY can access the server without a password
+mysql -e "UPDATE mysql.user SET Password = PASSWORD('CHANGEME') WHERE User = 'root'"
+# Make our changes take effect
+mysql -e "FLUSH PRIVILEGES"
 
 echo "=> Done!"
 

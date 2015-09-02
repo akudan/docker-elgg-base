@@ -11,20 +11,19 @@ RUN apt-get update && \
   echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Add image configuration and scripts
-RUN mkdir /etc/service/apache2
-ADD start-apache2.sh /etc/service/apache2/run
+RUN mkdir /etc/sv/apache2
+ADD start-apache2.sh /etc/sv/apache2/run
+RUN chmod +x /etc/sv/apache2/run
 
-RUN mkdir /etc/service/mysqld
-ADD start-mysqld.sh /etc/service/mysqld/run
 ADD my.cnf /etc/mysql/conf.d/my.cnf
+RUN mkdir /etc/service/mysql
+ADD start-mysqld.sh /etc/service/mysql/run
+RUN chmod +x /etc/service/mysql/run
 
 # Fix sendmail with ssmtp
 ADD sendmail.ini /etc/php5/mods-available/sendmail.ini
 RUN php5enmod sendmail
 ADD rewrite-sendmail.sh /rewrite-sendmail.sh
-
-# Remove pre-installed database
-RUN rm -rf /var/lib/mysql/*
 
 # Add MySQL utils
 ADD create_mysql_admin_user.sh /create_mysql_admin_user.sh
