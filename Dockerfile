@@ -36,11 +36,8 @@ RUN a2enmod rewrite
 RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Translate all git:// to https://
-# Thank you http://stackoverflow.com/questions/15903275/git-is-blocked-how-to-install-npm-modules
-RUN git config --global url."https://".insteadOf git://
+ENV HOME /usr/local/bin
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=$HOME --filename=composer
 
 # Media directory is the data directory
 RUN chown -R www-data:www-data /media
@@ -50,7 +47,7 @@ ENV PHP_UPLOAD_MAX_FILESIZE 10M
 ENV PHP_POST_MAX_SIZE 10M
 
 # Fix perms on scripts
-RUN chmod 755 /*.sh
+RUN chmod +x /*.sh
 
 # clean up tmp files (we don't need them for the image)
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
