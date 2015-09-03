@@ -37,6 +37,7 @@ RUN mkdir -p /app && rm -fr /var/www/html && ln -s /app /var/www/html
 
 # Install Composer
 ENV HOME /usr/local/bin
+RUN echo $HOME > /etc/container_environment/HOME
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=$HOME --filename=composer
 
 # Media directory is the data directory
